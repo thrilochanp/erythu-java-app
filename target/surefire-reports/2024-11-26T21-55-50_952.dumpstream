@@ -1,0 +1,5 @@
+# Created at 2024-11-26T21:55:51.215
+Boot Manifest-JAR contains absolute paths in classpath 'g:\InHouse_DevOps_Projects\erythu-java-app\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
