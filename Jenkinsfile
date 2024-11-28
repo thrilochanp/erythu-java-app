@@ -15,6 +15,15 @@ pipeline {
 
     stages {
 
+        stage('Cleanup Workspace') {
+            steps {
+                script {
+                    echo 'Cleaning up the Jenkins workspace...'
+                    deleteDir()
+                }
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 echo "DEBUG: Checking out the source code from SCM..."
