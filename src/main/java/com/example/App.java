@@ -9,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 
+// Main class for JPA operations
 public class App {
     public static void main(String[] args) {
         // Initialize JPA Entity Manager
@@ -20,7 +21,6 @@ public class App {
             System.out.println("JPA Transaction started...");
             
             // Perform your entity operations here
-            // Example: Create or fetch entities
             System.out.println("Performing entity operations...");
             
             em.getTransaction().commit();
@@ -36,16 +36,20 @@ public class App {
 }
 
 // Define the JAX-RS Application path
-@ApplicationPath("/")
-class RestApplication extends Application {}
+@ApplicationPath("/api") // Sets the base path for REST API endpoints
+class RestApplication extends Application {
+    public RestApplication() {
+        super(); // Ensure a public constructor
+    }
+}
 
 // REST API endpoint to handle requests
-@Path("/")
+@Path("/welcome") // Sets the endpoint URL path as `/api/welcome`
 class WelcomeResource {
 
     @GET
     public Response welcomeMessage() {
         String message = "Welcome to e-rythu portal";
-        return Response.ok(message).build();
+        return Response.ok(message).build(); // Returns the response with status 200 OK
     }
 }
