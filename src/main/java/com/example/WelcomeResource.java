@@ -6,7 +6,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 // Define the resource URL path (e.g., "/welcome")
-@Path("/welcome")
+@Path("/")
 public class WelcomeResource {
 
     // Handle GET requests and produce plain text responses
