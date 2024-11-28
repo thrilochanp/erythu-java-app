@@ -8,7 +8,7 @@ pipeline {
         JBOSS_USER = "admin"     // JBoss management username
         JBOSS_PASSWORD = "redhat" // JBoss management password
         JBOSS_HOME = "/home/jboss/EAP-7.4.0" // JBoss EAP home directory on the JBoss VM
-        WAR_FILE = "erythu-java-app/target/erythu-java-app-1.0-SNAPSHOT.war" // Path to .war file in Jenkins workspace
+        WAR_FILE = "target/erythu-java-app-1.0-SNAPSHOT.war" // Path to .war file in Jenkins workspace
         REMOTE_WAR_PATH = "/home/jboss" // Target directory on JBoss VM for .war file
         JBOSS_PORT = "13190"                // JBoss management console port
     }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "DEBUG: Starting Maven build to generate the WAR file..."
-                    sh 'mvn clean install -f erythu-java-app/pom.xml'
+                    sh 'mvn clean install -f pom.xml'
                     echo "DEBUG: Maven build completed. Checking for WAR file existence..."
                     sh '''
                     if [ -f ${WAR_FILE} ]; then
@@ -58,7 +58,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo "DEBUG: Running unit tests with Maven..."
-                sh 'mvn test -f erythu-java-app/pom.xml'
+                sh 'mvn test -f pom.xml'
             }
         }
 
