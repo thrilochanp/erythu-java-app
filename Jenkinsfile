@@ -14,10 +14,17 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 echo "DEBUG: Checking out the source code from SCM..."
                 checkout scm
+            }
+        }
+
+        stage('Verify Workspace') {
+            steps {
+                sh 'ls -R'
             }
         }
 
