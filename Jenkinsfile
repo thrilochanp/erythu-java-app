@@ -2,18 +2,42 @@ pipeline {
     agent any
 
     environment {
-        SERVER_IP = "rhel8.redhat.com" // IP address of the JBoss VM
-        HOST_USER = "jboss"        // Host machine SSH username
-        HOST_PASSWORD = "redhat" // Host machine SSH password
-        JBOSS_USER = "admin"     // JBoss management username
-        JBOSS_PASSWORD = "redhat" // JBoss management password
-        JBOSS_HOME = "/home/jboss/EAP-7.4.0" // JBoss EAP home directory on the JBoss VM
-        WAR_FILE = "target/erythu-java-app-1.0-SNAPSHOT.war" // Path to .war file in Jenkins workspace
-        REMOTE_WAR_PATH = "/home/jboss" // Target directory on JBoss VM for .war file
-        JBOSS_PORT = "13190"                // JBoss management console port
+        // Placeholder for Vault secrets injection
     }
 
     stages {
+        stage('Fetch Secrets from Vault') {
+            steps {
+                script {
+                    withVault(
+                        configuration: [
+                            vaultUrl: 'http://127.0.0.1:8200',
+                            vaultCredentialsId: 'vault-token'
+                        ], 
+                        vaultSecrets: [
+                            [
+                                path: 'secret/erythu-java-app', 
+                                secretValues: [
+                                    [envVar: 'SERVER_IP', vaultKey: 'server_ip'], 
+                                    [envVar: 'HOST_USER', vaultKey: 'host_user'], 
+                                    [envVar: 'HOST_PASSWORD', vaultKey: 'host_password'], 
+                                    [envVar: 'JBOSS_USER', vaultKey: 'jboss_user'], 
+                                    [envVar: 'JBOSS_PASSWORD', vaultKey: 'jboss_password'], 
+                                    [envVar: 'JBOSS_HOME', vaultKey: 'jboss_home'], 
+                                    [envVar: 'WAR_FILE', vaultKey: 'war_file'], 
+                                    [envVar: 'REMOTE_WAR_PATH', vaultKey: 'remote_war_path'], 
+                                    [envVar: 'JBOSS_PORT', vaultKey: 'jboss_port'], 
+                                    [envVar: 'SONAR_HOST_URL', vaultKey: 'sonar_host_url'], 
+                                    [envVar: 'SONAR_TOKEN', vaultKey: 'sonar_token']
+                                ]
+                            ]
+                        ]
+                    ) {
+                        echo 'Secrets fetched from Vault and injected into environment variables.'
+                    }
+                }
+            }
+        }
 
         stage('Cleanup Workspace') {
             steps {
@@ -55,10 +79,21 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('SonarQube Analysis') {
             steps {
-                echo "DEBUG: Running unit tests with Maven..."
-                sh 'mvn test -f pom.xml'
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=erythu-java-app -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
             }
         }
 
