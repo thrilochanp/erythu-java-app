@@ -8,26 +8,27 @@ pipeline {
     stages {
         stage('Fetch Secrets from Vault') {
             steps {
-                script {
-                    withVault(
-                        vaultUrl: 'http://127.0.0.1:8200',
-                        vaultCredentialsId: 'vault-token',
-                        secrets: [
-                            [path: 'secret/data/erythu-java-app', secretValues: [
-                                [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
-                                [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
-                                [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
-                                [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
-                                [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
-                                [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
-                                [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
-                                [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT']
-                            ]]
-                        ]
-                    ) {
-                        echo "Vault secrets fetched successfully."
-                        echo "SERVER_IP: ${SERVER_IP}"
-                        echo "JBOSS_USER: ${JBOSS_USER}"
+                withVault(
+                    vaultSecrets: [
+                        [path: 'secret/data/erythu-java-app', secretValues: [
+                            [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
+                            [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
+                            [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
+                            [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
+                            [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT'],
+                            [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
+                            [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
+                            [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
+                            [envVar: 'SONAR_HOST_URL', vaultKey: 'SONAR_HOST_URL'],
+                            [envVar: 'SONAR_TOKEN', vaultKey: 'SONAR_TOKEN'],
+                            [envVar: 'WAR_FILE', vaultKey: 'WAR_FILE']
+                        ]]
+                    ]
+                ) {
+                    script {
+                        // Example usage of the secret values
+                        echo "Server IP: ${env.SERVER_IP}"
+                        echo "JBoss User: ${env.JBOSS_USER}"
                     }
                 }
             }
