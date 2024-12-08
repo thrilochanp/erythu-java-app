@@ -9,25 +9,25 @@ pipeline {
         stage('Fetch Secrets from Vault') {
             steps {
                 script {
-                    withVault([
-                        vaultUrl: 'http://127.0.0.1:8200',
-                        secrets: [
+                    withVault(
+                        vaultConfig: [
+                            vaultUrl: 'http://127.0.0.1:8200',
+                            credentialsId: 'vault-credentials-id'
+                        ],
+                        vaultSecrets: [
                             [path: 'secret/erythu-java-app', secretValues: [
-                                [envVar: 'SERVER_IP', vaultKey: 'server_ip'],
-                                [envVar: 'HOST_USER', vaultKey: 'host_user'],
-                                [envVar: 'HOST_PASSWORD', vaultKey: 'host_password'],
-                                [envVar: 'JBOSS_USER', vaultKey: 'jboss_user'],
-                                [envVar: 'JBOSS_PASSWORD', vaultKey: 'jboss_password'],
-                                [envVar: 'JBOSS_HOME', vaultKey: 'jboss_home'],
-                                [envVar: 'WAR_FILE', vaultKey: 'war_file'],
-                                [envVar: 'REMOTE_WAR_PATH', vaultKey: 'remote_war_path'],
-                                [envVar: 'JBOSS_PORT', vaultKey: 'jboss_port'],
-                                [envVar: 'SONAR_HOST_URL', vaultKey: 'sonar_host_url'],
-                                [envVar: 'SONAR_TOKEN', vaultKey: 'sonar_token']
+                                [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
+                                [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
+                                [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
+                                [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
+                                [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
+                                [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
+                                [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
+                                [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT']
                             ]]
                         ]
-                    ]) {
-                        echo "Fetched secrets from Vault successfully."
+                    ) {
+                        echo "Vault secrets fetched successfully."
                     }
                 }
             }
