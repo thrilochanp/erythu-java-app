@@ -13,7 +13,7 @@ pipeline {
                         vaultUrl: 'http://127.0.0.1:8200',
                         vaultCredentialsId: 'vault-token',
                         secrets: [
-                            [path: 'secret/erythu-java-app', secretValues: [
+                            [path: 'secret/data/erythu-java-app', secretValues: [
                                 [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
                                 [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
                                 [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
