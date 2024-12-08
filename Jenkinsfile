@@ -1,9 +1,9 @@
 pipeline {
     agent any
 
-    environment {
-        // Placeholder for Vault secrets injection
-    }
+    // environment {
+    //     // Placeholder for Vault secrets injection
+    // }
 
     stages {
         stage('Fetch Secrets from Vault') {
