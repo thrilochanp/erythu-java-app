@@ -10,11 +10,9 @@ pipeline {
             steps {
                 script {
                     withVault(
-                        vaultConfig: [
-                            vaultUrl: 'http://127.0.0.1:8200',
-                            credentialsId: 'vault-credentials-id'
-                        ],
-                        vaultSecrets: [
+                        vaultUrl: 'http://127.0.0.1:8200',
+                        vaultCredentialsId: 'vault-credentials-id',
+                        secrets: [
                             [path: 'secret/erythu-java-app', secretValues: [
                                 [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
                                 [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
@@ -26,9 +24,8 @@ pipeline {
                                 [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT']
                             ]]
                         ]
-                    ) {
-                        echo "Vault secrets fetched successfully."
-                    }
+                    )
+                    echo "Vault secrets fetched successfully."
                 }
             }
         }
