@@ -24,8 +24,11 @@ pipeline {
                                 [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT']
                             ]]
                         ]
-                    )
-                    echo "Vault secrets fetched successfully."
+                    ) {
+                        echo "Vault secrets fetched successfully."
+                        echo "SERVER_IP: ${SERVER_IP}"
+                        echo "JBOSS_USER: ${JBOSS_USER}"
+                    }
                 }
             }
         }
