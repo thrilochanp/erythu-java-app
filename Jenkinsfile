@@ -11,7 +11,7 @@ pipeline {
                 script {
                     withVault(
                         vaultUrl: 'http://127.0.0.1:8200',
-                        vaultCredentialsId: 'vault-credentials-id',
+                        vaultCredentialsId: 'vault-token',
                         secrets: [
                             [path: 'secret/erythu-java-app', secretValues: [
                                 [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
