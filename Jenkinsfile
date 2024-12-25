@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    // environment {
+    //     // Placeholder for Vault secrets injection
+    // }
+
     stages {
         stage('Fetch Secrets from Vault') {
             steps {
@@ -22,6 +26,7 @@ pipeline {
                     ]
                 ) {
                     script {
+                        // Example usage of the secret values
                         echo "Server IP: ${env.SERVER_IP}"
                         echo "JBoss User: ${env.JBOSS_USER}"
                     }
@@ -45,11 +50,18 @@ pipeline {
             }
         }
 
+        stage('Verify Workspace') {
+            steps {
+                sh 'ls -R'
+            }
+        }
+
         stage('Build WAR File') {
             steps {
                 script {
                     echo "DEBUG: Starting Maven build to generate the WAR file..."
                     sh 'mvn clean install -f pom.xml'
+                    echo "DEBUG: Maven build completed. Checking for WAR file existence..."
                     sh '''
                     if [ -f ${WAR_FILE} ]; then
                         echo "DEBUG: WAR file generated successfully at ${WAR_FILE}."
@@ -80,72 +92,34 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "DEBUG: Building Docker image..."
-                    sh """
-                        docker build -t erythu-java-app:1.0 .
-                    """
-                }
-            }
-        }
-
-        stage('Push to Minikube Registry') {
-            steps {
-                script {
-                    echo "DEBUG: Loading Docker image to Minikube..."
-                    sh """
-                        minikube image load erythu-java-app:1.0
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Minikube') {
-            steps {
-                script {
-                    echo "DEBUG: Applying Kubernetes configuration..."
-                    sh """
-                        kubectl apply -f deployment.yaml
-                        kubectl apply -f service.yaml
-                    """
-                }
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                script {
-                    echo "DEBUG: Verifying Kubernetes deployment..."
-                    sh """
-                        kubectl get pods
-                        kubectl get services
-                    """
-                }
-            }
-        }
-
         stage('Transfer WAR File to JBoss') {
             steps {
                 script {
                     echo "DEBUG: Starting transfer of WAR file to JBoss server..."
                     sh """
+                        # Validate environment variables
+                        echo "DEBUG: Validating environment variables...";
+
                         if [ -z "${HOST_PASSWORD}" ] || [ -z "${WAR_FILE}" ] || [ -z "${HOST_USER}" ] || [ -z "${SERVER_IP}" ] || [ -z "${REMOTE_WAR_PATH}" ]; then
                             echo "ERROR: One or more required environment variables are undefined.";
                             exit 1;
                         fi
+                        echo "DEBUG: All environment variables are set.";
 
+                        # Verify sshpass installation
                         if ! command -v sshpass >/dev/null 2>&1; then
                             echo "ERROR: sshpass is not installed!";
                             exit 1;
                         fi
 
+                        # Verify WAR file existence
                         if [ ! -f ${WAR_FILE} ]; then
                             echo "ERROR: WAR file not found at ${WAR_FILE}.";
                             exit 1;
                         fi
 
+                        # Transfer WAR file
+                        echo "DEBUG: Transferring WAR file to target server...";
                         sshpass -p '${HOST_PASSWORD}' scp -o StrictHostKeyChecking=no ${WAR_FILE} ${HOST_USER}@${SERVER_IP}:${REMOTE_WAR_PATH} || {
                             echo "ERROR: SCP transfer failed!";
                             exit 1;
@@ -162,12 +136,12 @@ pipeline {
                 script {
                     echo "DEBUG: Starting deployment of WAR file on JBoss server..."
                     sh """
-                        sshpass -p '${HOST_PASSWORD}' ssh -o StrictHostKeyChecking=no ${HOST_USER}@${SERVER_IP} \
-                        '${JBOSS_HOME}/bin/jboss-cli.sh --connect --controller=${SERVER_IP}:${JBOSS_PORT} --user=${JBOSS_USER} --password=${JBOSS_PASSWORD} --command="deploy ${REMOTE_WAR_PATH}/erythu-java-app-1.0-SNAPSHOT.war --force"' || {
-                            echo "ERROR: Deployment failed!"
-                            exit 1
-                        }
-                        echo "DEBUG: Deployment completed successfully."
+                    sshpass -p '${HOST_PASSWORD}' ssh -o StrictHostKeyChecking=no ${HOST_USER}@${SERVER_IP} \
+                    '${JBOSS_HOME}/bin/jboss-cli.sh --connect --controller=${SERVER_IP}:${JBOSS_PORT} --user=${JBOSS_USER} --password=${JBOSS_PASSWORD} --command="deploy ${REMOTE_WAR_PATH}/erythu-java-app-1.0-SNAPSHOT.war --force"' || {
+                        echo "ERROR: Deployment failed!"
+                        exit 1
+                    }
+                    echo "DEBUG: Deployment completed successfully."
                     """
                 }
             }
