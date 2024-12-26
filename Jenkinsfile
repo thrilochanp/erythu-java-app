@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    // environment {
-    //     // Placeholder for Vault secrets injection
-    // }
-
     stages {
         stage('Fetch Secrets from Vault') {
             steps {
@@ -26,9 +22,8 @@ pipeline {
                     ]
                 ) {
                     script {
-                        // Example usage of the secret values
-                        echo "Server IP: ${env.SERVER_IP}"
-                        echo "JBoss User: ${env.JBOSS_USER}"
+                        echo "DEBUG: Secrets fetched successfully from Vault."
+                        // Optional debug logs (ensure secrets are not printed)
                     }
                 }
             }
@@ -76,8 +71,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=erythu-java-app -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                script {
+                    echo "DEBUG: Starting SonarQube analysis..."
+                    sh """
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=erythu-java-app \
+                    -Dsonar.host.url=${SONAR_HOST_URL} \
+                    -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
@@ -98,12 +99,13 @@ pipeline {
                     echo "DEBUG: Starting transfer of WAR file to JBoss server..."
                     sh """
                         # Validate environment variables
-                        echo "DEBUG: Validating environment variables...";
+                        echo "DEBUG: Validating environment variables..." || exit 1;
 
                         if [ -z "${HOST_PASSWORD}" ] || [ -z "${WAR_FILE}" ] || [ -z "${HOST_USER}" ] || [ -z "${SERVER_IP}" ] || [ -z "${REMOTE_WAR_PATH}" ]; then
                             echo "ERROR: One or more required environment variables are undefined.";
                             exit 1;
                         fi
+
                         echo "DEBUG: All environment variables are set.";
 
                         # Verify sshpass installation
