@@ -71,8 +71,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    echo "DEBUG: Starting SonarQube analysis..."
+                withCredentials([
+                    string(credentialsId: 'sonar', variable: 'SONAR_TOKEN'),
+                    string(credentialsId: 'sonar-host-url', variable: 'SONAR_HOST_URL')
+                ]) {
+                    sh '''
+                        echo "SONAR_HOST_URL = $SONAR_HOST_URL"
+                        echo "SONAR_TOKEN = $SONAR_TOKEN"
+                    '''
                     sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=erythu-java-app -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
                 }
             }
