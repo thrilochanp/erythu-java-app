@@ -73,12 +73,7 @@ pipeline {
             steps {
                 script {
                     echo "DEBUG: Starting SonarQube analysis..."
-                    sh """
-                    mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=erythu-java-app \
-                    -Dsonar.host.url=${env.SONAR_HOST_URL} \
-                    -Dsonar.login=${env.SONAR_TOKEN}
-                    """
+                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=erythu-java-app -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
                 }
             }
         }
