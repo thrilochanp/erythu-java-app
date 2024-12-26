@@ -71,24 +71,35 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'sonar', variable: 'SONAR_TOKEN'),
-                    string(credentialsId: 'sonar-host-url', variable: 'SONAR_HOST_URL')
-                ]) {
-                    sh '''
-                        echo "SONAR_HOST_URL = $SONAR_HOST_URL"
-                        echo "SONAR_TOKEN = $SONAR_TOKEN"
-                    '''
-                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=erythu-java-app -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                script {
+                    // Define credentials for SonarQube host and token
+                    withCredentials([
+                        string(credentialsId: 'sonar', variable: 'SONAR_TOKEN'),
+                        string(credentialsId: 'sonar-host-url', variable: 'SONAR_HOST_URL')
+                    ]) {
+                        // Wrap the analysis in withSonarQubeEnv
+                        withSonarQubeEnv('SonarQube') { // Replace 'SonarQube' with your SonarQube server name in Jenkins configuration
+                            sh """
+                                mvn clean verify sonar:sonar \
+                                    -Dsonar.projectKey=erythu-java-app \
+                                    -Dsonar.host.url=$SONAR_HOST_URL \
+                                    -Dsonar.login=$SONAR_TOKEN
+                            """
+                        }
+                    }
                 }
             }
         }
 
-        stage('Quality Gate') {
+        stage('Quality Gate Check') {
             steps {
                 script {
-                    timeout(time: 1, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
+                    // Wait for SonarQube Quality Gate result
+                    timeout(time: 5, unit: 'MINUTES') { // Adjust timeout as needed
+                        def qualityGate = waitForQualityGate()
+                        if (qualityGate.status != 'OK') {
+                            error "Pipeline aborted due to SonarQube quality gate failure: ${qualityGate.status}"
+                        }
                     }
                 }
             }
