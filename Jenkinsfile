@@ -2,6 +2,22 @@ pipeline {
     agent any
 
     stages {
+
+        stage('Check Vault Health') {
+            steps {
+                script {
+                    def response = sh(
+                        script: "curl -s --connect-timeout 5 -o /dev/null -w '%{http_code}' http://13.233.124.117:8200/v1/sys/health",
+                        returnStdout: true
+                    ).trim()
+
+                    if (response != '200' && response != '429') {
+                        error "Vault is not reachable or healthy. Status code: ${response}"
+                    }
+                }
+            }
+        }
+
         stage('Fetch Secrets from Vault') {
             steps {
                 withVault(
