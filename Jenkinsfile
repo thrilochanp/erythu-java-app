@@ -5,15 +5,25 @@ pipeline {
 
         stage('Check Vault Health') {
             steps {
-                echo "Running vault health check.."
                 script {
-                    def response = sh(
-                        script: "curl -s --connect-timeout 5 -o /dev/null -w '%{http_code}' http://13.233.124.117:8200/v1/sys/health",
-                        returnStdout: true
-                    ).trim()
+                    def responseCode = sh(
+                        script: """
+                            echo "Checking Vault health at http://13.233.124.117:8200..."
+                            response=\$(curl -s --connect-timeout 131 -o /dev/null -w '%{http_code}' http://13.233.124.117:8200/v1/sys/health || echo 'timeout')
+                            echo \$response
+                            echo \$response > vault_response.txt
+                        """,
+                        returnStatus: true
+                    )
 
-                    if (response != '200' && response != '429') {
-                        error "Vault is not reachable or healthy. Status code: ${response}"
+                    def vaultStatus = readFile('vault_response.txt').trim()
+
+                    if (vaultStatus == 'timeout') {
+                        error "ERROR: Vault connection timed out after 131 seconds. Ensure Vault server at 13.233.124.117:8200 is up and reachable from Jenkins."
+                    } else if (vaultStatus != '200' && vaultStatus != '429') {
+                        error "ERROR: Vault is not reachable or not healthy. HTTP status code: ${vaultStatus}"
+                    } else {
+                        echo "DEBUG: Vault is healthy. Status code: ${vaultStatus}"
                     }
                 }
             }
