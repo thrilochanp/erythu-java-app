@@ -2,28 +2,56 @@ pipeline {
     agent any
 
     stages {
+        // stage('Fetch Secrets from Vault') {
+        //     steps {
+        //         withVault(
+        //             vaultSecrets: [
+        //                 [path: 'secret/data/erythu-java-app', secretValues: [
+        //                     [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
+        //                     [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
+        //                     [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
+        //                     [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
+        //                     [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT'],
+        //                     [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
+        //                     [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
+        //                     [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
+        //                     [envVar: 'SONAR_HOST_URL', vaultKey: 'SONAR_HOST_URL'],
+        //                     [envVar: 'SONAR_TOKEN', vaultKey: 'SONAR_TOKEN'],
+        //                     [envVar: 'WAR_FILE', vaultKey: 'WAR_FILE']
+        //                 ]]
+        //             ]
+        //         ) {
+        //             script {
+        //                 echo "DEBUG: Secrets fetched successfully from Vault."
+        //                 // Optional debug logs (ensure secrets are not printed)
+        //             }
+        //         }
+        //     }
+        // }
+
         stage('Fetch Secrets from Vault') {
             steps {
-                withVault(
-                    vaultSecrets: [
-                        [path: 'secret/data/erythu-java-app', secretValues: [
-                            [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
-                            [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
-                            [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
-                            [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
-                            [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT'],
-                            [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
-                            [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
-                            [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
-                            [envVar: 'SONAR_HOST_URL', vaultKey: 'SONAR_HOST_URL'],
-                            [envVar: 'SONAR_TOKEN', vaultKey: 'SONAR_TOKEN'],
-                            [envVar: 'WAR_FILE', vaultKey: 'WAR_FILE']
-                        ]]
-                    ]
-                ) {
-                    script {
-                        echo "DEBUG: Secrets fetched successfully from Vault."
-                        // Optional debug logs (ensure secrets are not printed)
+                timeout(time: 2, unit: 'MINUTES') {
+                    withVault(
+                        vaultSecrets: [
+                            [path: 'secret/data/erythu-java-app', secretValues: [
+                                [envVar: 'HOST_PASSWORD', vaultKey: 'HOST_PASSWORD'],
+                                [envVar: 'HOST_USER', vaultKey: 'HOST_USER'],
+                                [envVar: 'JBOSS_HOME', vaultKey: 'JBOSS_HOME'],
+                                [envVar: 'JBOSS_PASSWORD', vaultKey: 'JBOSS_PASSWORD'],
+                                [envVar: 'JBOSS_PORT', vaultKey: 'JBOSS_PORT'],
+                                [envVar: 'JBOSS_USER', vaultKey: 'JBOSS_USER'],
+                                [envVar: 'REMOTE_WAR_PATH', vaultKey: 'REMOTE_WAR_PATH'],
+                                [envVar: 'SERVER_IP', vaultKey: 'SERVER_IP'],
+                                [envVar: 'SONAR_HOST_URL', vaultKey: 'SONAR_HOST_URL'],
+                                [envVar: 'SONAR_TOKEN', vaultKey: 'SONAR_TOKEN'],
+                                [envVar: 'WAR_FILE', vaultKey: 'WAR_FILE']
+                            ]]
+                        ]
+                    ) {
+                        script {
+                            echo "DEBUG: Secrets fetched successfully from Vault."
+                        }
                     }
                 }
             }
