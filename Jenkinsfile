@@ -5,6 +5,7 @@ pipeline {
 
         stage('Check Vault Health') {
             steps {
+                echo "Running vault health check.."
                 script {
                     def response = sh(
                         script: "curl -s --connect-timeout 5 -o /dev/null -w '%{http_code}' http://13.233.124.117:8200/v1/sys/health",
